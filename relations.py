@@ -1,7 +1,5 @@
 from pyrsistent import s, freeze
 
-def compose(P,Q):
-        if P[1] == Q[0]: return 
 
 class Relation:
     def __init__(self,M,rel = s()):
@@ -32,11 +30,12 @@ class Relation:
 
     def inverse(self):
         return Relation(self.M,
-                        freeze(set(map(lambda x: x[::-1],self.rel))))
+                        freeze(set(x[::-1] for x in self.rel)))
 
     def composition(self,R):
-        return Relation(self.M.union(R.M),freeze(set(
-                (a,c) for (a,b1) in self.rel for (b2,c) in R.rel if b1 == b2)))
+        return Relation(self.M.union(R.M),
+                        freeze(set( (a,c) for (a,b1) in self.rel
+                                    for (b2,c) in R.rel if b1 == b2)))
 
     def reflexive(self):
         return all(self.contains(a,a) for a in self.M)
@@ -48,22 +47,16 @@ class Relation:
         return all(self.contains(a,c) or b1 != b2
                    for (a,b1) in self.rel for (b2,c) in self.rel)
 
+    def closure(self):
+        R = Relation(self.M,freeze(set((a,a) for a in self.M)).union(self.rel))
+        while True:
+            S = R.union(self.composition(R))
+            if len(R.rel) >= len(S.rel): return R
+            R = S
+                       
+
+
+
 def get_relation_class(M):
     return Relation(M)
 
-
-a = get_relation_class({1,2,3,4})
-a = a.add(1,3)
-a = a.add(3,3)
-a = a.add(2,4)
-a = a.add(4,4)
-b = get_relation_class({1,2,3,4})
-b = b.add(1,1)
-b = b.add(1,2)
-b = b.add(3,2)
-b = b.add(4,3)
-c = a.composition(b)
-
-print(a.rel)
-print(b.rel)
-print(c.rel)
