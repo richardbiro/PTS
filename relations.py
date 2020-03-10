@@ -34,8 +34,8 @@ class Relation:
 
     def composition(self,R):
         return Relation(self.M.union(R.M),
-                        freeze(set( (a,c) for (a,b1) in self.rel
-                                    for (b2,c) in R.rel if b1 == b2)))
+                        freeze(set( (a,c) for (a,b1) in R.rel
+                                    for (b2,c) in self.rel if b1 == b2)))
 
     def reflexive(self):
         return all(self.contains(a,a) for a in self.M)
@@ -49,14 +49,59 @@ class Relation:
 
     def closure(self):
         R = Relation(self.M,freeze(set((a,a) for a in self.M)).union(self.rel))
-        while True:
-            S = R.union(self.composition(R))
-            if len(R.rel) >= len(S.rel): return R
-            R = S
-                       
+        while not self.composition(R).rel.issubset(R.rel):
+            R = R.union(self.composition(R))
+        return R
+
+    def printrel(self,text):
+        print()
+        print(text,"=",self.rel)
+        print("reflexivna?",self.reflexive())
+        print("symetricka?",self.symmetric())
+        print("tranzitivna?",self.transitive())
 
 
 
 def get_relation_class(M):
     return Relation(M)
+
+
+a = get_relation_class({1,2,3,4})
+a = a.add(1,1)
+a = a.add(1,3)
+a = a.add(2,2)
+a = a.add(2,3)
+a = a.add(3,2)
+a = a.add(4,1)
+a.printrel("A")
+
+a2 = a.inverse()
+a2.printrel("A^(-1)")
+
+a3 = a.closure()
+a3.printrel("A*")
+
+b = get_relation_class({1,2,3})
+b = b.add(1,2)
+b = b.add(1,3)
+b = b.add(2,3)
+b.printrel("B")
+
+ab = a.composition(b)
+ab.printrel("A o B")
+
+asb = a.subtract(b)
+asb.printrel("A - B")
+
+c = get_relation_class({1,2})
+c = c.add(1,2)
+c = c.add(2,1)
+c.printrel("C")
+
+buc = b.union(c)
+buc.printrel("B u C")
+
+
+
+
 
