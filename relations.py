@@ -49,8 +49,8 @@ class Relation:
 
     def closure(self):
         R = Relation(self.M,freeze(set((a,a) for a in self.M)).union(self.rel))
-        while not self.composition(R).rel.issubset(R.rel):
-            R = R.union(self.composition(R))
+        while not R.composition(self).rel.issubset(R.rel):
+            R = R.union(R.composition(self))
         return R
 
     def printrel(self,text):
