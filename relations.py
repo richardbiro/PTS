@@ -2,6 +2,10 @@ from pyrsistent import s, freeze
 
 
 class Relation:
+    #ak do initu dostanes prvykrat mutable set, tak bude mutable
+    #ak berieme ze objekty nemusia byt immutable
+    #lebo pri kazdej zmene sa meni instancia
+    #tak nemusis mat freeze v inverse a composition
     def __init__(self,M,rel = s()):
         self.M = M 
         self.rel = rel
@@ -9,6 +13,7 @@ class Relation:
     def contains(self,a,b):
         return (a,b) in self.rel
 
+    #pri metode add by som vypisala warning, ak prvok nepatri do mnoziny relacie
     def add(self,a,b):
         if a in self.M and b in self.M:
             return Relation(self.M,self.rel.add((a,b)))
@@ -19,6 +24,7 @@ class Relation:
             return Relation(self.M,self.rel.remove((a,b)))
         return self
 
+    #zjednot aj mnoziny relacii
     def union(self,R):
         return Relation(self.M,self.rel.union(R.rel))
 
@@ -47,6 +53,7 @@ class Relation:
         return all(self.contains(a,c) or b1 != b2
                    for (a,b1) in self.rel for (b2,c) in self.rel)
 
+    #nebolo by viac efektivne vytvorit si docasny set?
     def closure(self):
         R = Relation(self.M,freeze(set((a,a) for a in self.M)).union(self.rel))
         while not R.composition(self).rel.issubset(R.rel):
@@ -61,7 +68,7 @@ class Relation:
         print("tranzitivna?",self.transitive())
 
 
-
+#funkcia get_relation_class(M) vracia instanciu triedy, nie triedu
 def get_relation_class(M):
     return Relation(M)
 
